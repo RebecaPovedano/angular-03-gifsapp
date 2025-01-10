@@ -12,22 +12,41 @@ export class GifsService {
 
   public gifList: Gif[] = [];
 
-  constructor(private http: HttpClient) {}
-
+  constructor(private http: HttpClient) {
+    this.loadLocalStorage();
+  }
+  
   get tagsHistory() {
     return [...this._tagsHistory];
   }
-
+  
   private organizeHistory(tag: string) {
     tag = tag.toLowerCase();
-
+    
     if (this._tagsHistory.includes(tag)) {
       this._tagsHistory = this._tagsHistory.filter((oldTag) => oldTag !== tag);
     }
-
+    
     this._tagsHistory.unshift(tag);
-
+    
     this._tagsHistory = this.tagsHistory.splice(0, 10);
+    this.saveLocalStorage();
+  }
+  
+  private saveLocalStorage(): void {
+    localStorage.setItem('history', JSON.stringify(this._tagsHistory));
+  }
+  
+  private loadLocalStorage(): void {
+    let gifsLocal = localStorage.getItem('history');
+    
+    if(gifsLocal) {
+      this._tagsHistory = JSON.parse(gifsLocal);
+    }
+
+    if(this.tagsHistory && this.tagsHistory.length > 0) {
+      this.searchTag(this.tagsHistory[0]);
+    }
   }
 
   public searchTag(tag: string): void {
